@@ -142,16 +142,24 @@ export class Game {
   use() {
     if (this.state !== 'playing') return false;
     const p = this.player, dx = Math.cos(p.angle), dy = Math.sin(p.angle), L = this.level;
+    let openDoor = null;
     for (let t = 0.1; t <= RULES.useRange; t += 0.05) {
       const cx = Math.floor(p.x + dx*t), cy = Math.floor(p.y + dy*t), c = L.char(cx, cy);
       if (c === '.') continue;
       const i = L.index(cx, cy);
-      if (DOORS.includes(c)) return this.useDoor(L.doors.get(i), true);
+      if (DOORS.includes(c)) {
+        const door = L.doors.get(i);
+        // An open doorway is not a target: keep looking for what lies beyond it
+        // (in tab 3 the LOG OFF switch sits behind the boss door).
+        if (door.open >= 0.9 && door.state !== 'closing') { openDoor ??= door; continue; }
+        return this.useDoor(door, true);
+      }
       if (c === '?') { const h = L.hidden.get(i); if (!h.opening) { h.opening = true; this.emit('hidden', {x:cx, y:cy}); this.message(QUIPS.hidden); } return true; }
       if (c === 'X') { this.state = 'exit'; this.stats.time = this.time; this.emit('exit', {x:cx, y:cy}); this.message(QUIPS.exit); return true; }
       this.emit('bonk'); return false;
     }
-    return false;
+    // Nothing beyond an open door: pressing use on it closes it sooner.
+    return openDoor ? this.useDoor(openDoor, true) : false;
   }
   useDoor(door, byPlayer) {
     if (door.type === 'E') { if (byPlayer) { this.message(QUIPS.boss); this.emit('locked'); } return false; }

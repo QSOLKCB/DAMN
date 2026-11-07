@@ -123,7 +123,11 @@ function victory() {
 // ---- Input --------------------------------------------------------------------
 const HANDLED = new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyE','Tab','ShiftLeft','ShiftRight','ControlLeft','ControlRight','KeyQ','KeyM','KeyP','Escape','Digit1','Digit2','Digit3','Digit4','Digit5','Digit6']);
 window.addEventListener('keydown', e => {
-  if (state !== 'playing') { if (e.code === 'Escape' && state === 'pause') { e.preventDefault(); lock(); } return; }
+  if (state !== 'playing') {
+    // While a dialog is open, Escape belongs to the dialog (closing it keeps the game paused).
+    if (e.code === 'Escape' && state === 'pause' && !document.querySelector('dialog[open]')) { e.preventDefault(); lock(); }
+    return;
+  }
   if (HANDLED.has(e.code)) e.preventDefault();
   if (e.code === 'Escape' || e.code === 'KeyP') { pause(); return; }
   keys.add(e.code);

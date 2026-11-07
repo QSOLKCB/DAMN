@@ -193,3 +193,20 @@ test('the pixel font can print every joke in the game', () => {
   assert.match(grade({kills:10, totalKills:10, secrets:1, totalSecrets:1}), /^S/);
   assert.ok(musicStep(0, 0).length > 0 && musicStep(0, 2).length >= musicStep(0, 0).length);
 });
+
+test('after uninstalling the Algorithm, LOG OFF works through the opened boss door (real tab 3)', () => {
+  const g = new Game(LEVELS[2], {seed:5}); g.player.airplane = 1e9;
+  const boss = g.enemies.find(e => e.def.boss); g.kill(boss, g.player); run(g, 1.5);
+  const [door] = [...g.level.doors.values()].filter(d => d.y === 1 && d.x === 19);
+  assert.ok(door.open >= 1, 'boss door fully open');
+  // From the arena tile in front of the door, and from inside the doorway itself.
+  for (const y of [2.5, 1.5]) {
+    const h = new Game(LEVELS[2], {seed:5}); h.player.airplane = 1e9;
+    h.kill(h.enemies.find(e => e.def.boss), h.player); run(h, 1.5);
+    Object.assign(h.player, {x:19.5, y, angle:-Math.PI/2, vx:0, vy:0}); h.enemies = [];
+    assert.equal(h.use(), true); assert.equal(h.state, 'exit', `exit from y=${y}`);
+  }
+  // An open door with nothing behind it still responds (closes sooner).
+  const d = arena(['#####', '#@D.#', '#####']); d.use(); run(d, 1);
+  d.use(); assert.ok(d.level.doors.get(d.level.index(2, 1)).timer <= 0.1);
+});

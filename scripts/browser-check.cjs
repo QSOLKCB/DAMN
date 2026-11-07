@@ -65,6 +65,11 @@ const server = http.createServer((req, res) => {
     await page.keyboard.press('Escape'); await page.waitForSelector('#pause:not([hidden])');
     const g0 = await page.evaluate(() => __damn.gate.stats()); await page.waitForTimeout(400); const g1 = await page.evaluate(() => __damn.gate.stats());
     assert.ok(g1.skipped > g0.skipped + 5 && g1.drawn - g0.drawn <= 1, 'paused frames are gated'); await shot('09-pause');
+    // Escape inside Settings closes the dialog and leaves the game paused.
+    await page.click('#pause-settings'); await page.waitForSelector('#settings[open]');
+    await page.keyboard.press('Escape'); await page.waitForFunction(() => !document.querySelector('#settings').open);
+    await page.waitForTimeout(200);
+    assert.equal(await page.evaluate(() => __damn.state), 'pause', 'Escape in Settings must not resume the game');
     await page.click('#resume'); await page.evaluate(() => { if (__damn.state !== 'playing') __damn.beginPlaying(); });
     // Exit: stand at the LOG OFF switch and press it.
     await page.evaluate(() => { const g = __damn.game, p = g.player; Object.assign(p, {x:16.5, y:22.5, angle:Math.PI/2, vx:0, vy:0}); g.player.keys.add('r'); });
@@ -77,6 +82,14 @@ const server = http.createServer((req, res) => {
     await page.evaluate(() => { __damn.startLevel(2, null); });
     await page.evaluate(() => { __damn.beginPlaying(); const g = __damn.game; Object.assign(g.player, {x:19.5, y:12.5, angle:-Math.PI/2, airplane:999}); });
     await page.waitForTimeout(500); await shot('13-the-algorithm');
+    // Uninstall the boss and log off through the opened boss door with the real E binding.
+    await page.evaluate(() => { const g = __damn.game; g.kill(g.enemies.find(e => e.def.boss), g.player); });
+    await page.waitForFunction(() => [...__damn.game.level.doors.values()].some(d => d.x === 19 && d.y === 1 && d.open >= 1), null, {timeout:5000});
+    await page.evaluate(() => { const g = __damn.game; g.enemies = []; g.projectiles = []; Object.assign(g.player, {x:19.5, y:2.5, angle:-Math.PI/2, vx:0, vy:0}); });
+    await play(); await page.keyboard.press('KeyE');
+    await page.waitForSelector('#intermission:not([hidden])', {timeout:5000}); await shot('13b-algorithm-logged-off');
+    await page.click('#next-level'); await page.waitForSelector('#victory:not([hidden])'); await shot('13c-victory');
+    await page.evaluate(() => { __damn.startLevel(2, null); __damn.beginPlaying(); });
     // Death screen.
     await page.evaluate(() => { const g = __damn.game; g.player.airplane = 0; g.hurtPlayer(9999); });
     await page.waitForSelector('#dead:not([hidden])', {timeout:5000}); await shot('14-skill-issue');
