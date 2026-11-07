@@ -1,0 +1,36 @@
+:root{color-scheme:dark;--bg:#0b0a10;--ink:#f1f0f5;--muted:#a9a6b8;--red:#e03a3a;--yellow:#f5d33d;--green:#45c45a;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink)}
+#screen{position:fixed;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated}
+.crt{position:fixed;inset:0;pointer-events:none;z-index:2;background:repeating-linear-gradient(0deg,#0005 0 1px,transparent 1px 3px);box-shadow:inset 0 0 120px #000a}
+.crt.off{display:none}
+[hidden]{display:none!important}
+.screen{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px 16px;text-align:center;background:radial-gradient(ellipse at center,#0b0a1088 0%,#0b0a10ee 75%);overflow-y:auto}
+.screen.dim{background:#0b0a10d8}.screen.red{background:#3a0608e0}
+.logo{display:flex;gap:.04em;font-size:clamp(72px,18vw,180px);font-weight:900;line-height:.9;letter-spacing:-.02em;transform:skewX(-8deg)}
+.logo span{color:var(--red);text-shadow:.04em .04em 0 #7a1c22,.08em .08em 0 #2a0a0e,0 0 40px #e03a3a55;-webkit-text-stroke:2px #ffb3a0}
+.logo span:nth-child(2){color:var(--yellow);-webkit-text-stroke-color:#fff3b0;text-shadow:.04em .04em 0 #8a6a10,.08em .08em 0 #2a200a,0 0 40px #f5d33d44}
+.tag{margin:0;font-weight:800;letter-spacing:.2em;font-size:clamp(10px,1.6vw,14px);color:var(--yellow)}
+.blurb{max-width:620px;margin:0;color:var(--muted);font-size:13px;line-height:1.7}
+h2{margin:0;font-size:clamp(24px,5vw,44px);font-weight:900;letter-spacing:.02em;color:var(--yellow);text-shadow:3px 3px 0 #000}
+.kicker{margin:0;color:var(--muted);letter-spacing:.3em;font-size:11px}
+.menu{display:flex;flex-direction:column;gap:8px;width:min(380px,100%)}.menu.wide{width:min(520px,100%)}
+button{font:inherit;cursor:pointer;color:var(--ink);background:#1b1a24;border:2px solid #3a3846;padding:11px 14px;font-weight:800;letter-spacing:.08em;text-align:left;transition:background .1s,border-color .1s,transform .1s}
+button:hover,button:focus-visible{background:#2a2833;border-color:var(--yellow);outline:none;transform:translateX(4px)}
+button.big{background:var(--red);border-color:#ff8a7a;color:#fff}button.big:hover,button.big:focus-visible{background:#ff5050}
+button:disabled{opacity:.35;cursor:not-allowed;transform:none}
+button.text{background:none;border:0;color:var(--muted)}
+button small{display:block;font-weight:400;color:var(--muted);letter-spacing:0;margin-top:4px;font-size:11px}
+footer{position:absolute;bottom:12px;left:16px;right:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:10px;letter-spacing:.12em;color:var(--muted)}
+.stats{display:grid;grid-template-columns:auto auto;gap:6px 28px;margin:8px 0;font-size:15px;text-align:left}.stats dt{color:var(--muted)}.stats dd{margin:0;font-weight:800;text-align:right}
+.grade{font-size:20px;font-weight:900;color:var(--green);margin:0}
+.note{color:var(--muted);font-size:12px;max-width:520px;line-height:1.6}
+.error{background:#5a1c1c;padding:10px 14px;max-width:520px;color:#ffd0c0}
+dialog.panel{background:#141320;color:var(--ink);border:2px solid var(--yellow);max-width:min(560px,94vw);width:100%;padding:24px;max-height:90vh;overflow-y:auto}
+dialog::backdrop{background:#000b}
+dialog label{display:block;margin:14px 0;font-size:13px}dialog output{float:right;color:var(--yellow)}dialog input[type=range]{width:100%;accent-color:var(--red)}
+dialog label.check{display:flex;gap:10px;align-items:center}dialog input[type=checkbox]{width:18px;height:18px;accent-color:var(--red)}
+dialog p{color:var(--muted);line-height:1.6;font-size:13px}dialog .big{margin-top:14px;width:100%}
+.keys{display:grid;grid-template-columns:1fr auto;gap:10px;font-size:13px;margin:16px 0}
+kbd{border:1px solid #5a5866;border-bottom-width:3px;padding:3px 7px;font:inherit;font-size:11px;white-space:nowrap}
+.noscript{position:fixed;inset:0;display:grid;place-items:center;margin:0;z-index:20;background:var(--bg)}
+@media (max-width:600px){.blurb br{display:none}footer{position:static;margin-top:16px}}

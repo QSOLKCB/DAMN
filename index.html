@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0a10">
+  <meta name="description" content="DAMN: Doomscrolling Against Mandatory Notifications. An original, fully offline 90s-style browser shooter about logging off. Violently.">
+  <title>DAMN / Log off. Violently.</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <canvas id="screen" aria-label="DAMN game view"></canvas>
+  <div id="crt" class="crt" aria-hidden="true"></div>
+
+  <main id="title" class="screen">
+    <div class="logo" aria-label="DAMN"><span>D</span><span>A</span><span>M</span><span>N</span></div>
+    <p class="tag">DOOMSCROLLING AGAINST MANDATORY NOTIFICATIONS</p>
+    <p class="blurb">The Algorithm went sentient. The comment section leaked into reality.<br>You are the last person who reads the terms and conditions. Log off. Violently.</p>
+    <nav class="menu">
+      <button id="new-game" class="big">NEW GAME</button>
+      <button id="continue">CONTINUE</button>
+      <button id="open-settings">SETTINGS</button>
+      <button id="open-controls">CONTROLS</button>
+      <button id="open-credits">CREDITS</button>
+    </nav>
+    <p id="error" class="error" role="alert" hidden></p>
+    <footer><span id="offline">OFFLINE COPY PENDING</span><span>NO ADS. NO TRACKING. NO WI-FI REQUIRED.</span><span>v1.0.0</span></footer>
+  </main>
+
+  <section id="difficulty" class="screen" hidden>
+    <h2>HOW ONLINE ARE YOU?</h2>
+    <div id="difficulty-list" class="menu wide"></div>
+    <button class="back text">◂ BACK</button>
+  </section>
+
+  <section id="levels" class="screen" hidden>
+    <h2>PICK A TAB</h2>
+    <div id="level-list" class="menu wide"></div>
+    <button class="back text">◂ BACK</button>
+  </section>
+
+  <section id="pause" class="screen dim" hidden>
+    <h2>ARE YOU STILL PLAYING?</h2>
+    <p class="blurb">The game paused itself to protect your screen time. Not that you care.</p>
+    <nav class="menu">
+      <button id="resume" class="big">YES, I'M STILL PLAYING</button>
+      <button id="pause-settings">SETTINGS</button>
+      <button id="restart">RESTART LEVEL</button>
+      <button id="quit">QUIT TO TITLE (TOUCH GRASS)</button>
+    </nav>
+    <p id="lock-note" class="note"></p>
+  </section>
+
+  <section id="intermission" class="screen dim" hidden>
+    <p class="kicker">LOGGED OFF FROM</p>
+    <h2 id="inter-name">THE COMMENT SECTION</h2>
+    <dl id="inter-stats" class="stats"></dl>
+    <p id="inter-grade" class="grade"></p>
+    <p id="inter-quip" class="blurb"></p>
+    <button id="next-level" class="big">NEXT TAB ▸</button>
+  </section>
+
+  <section id="dead" class="screen dim red" hidden>
+    <h2 id="dead-quip">SKILL ISSUE.</h2>
+    <p class="blurb">Your vibes reached zero. Have you considered being better?</p>
+    <nav class="menu"><button id="retry" class="big">TRY AGAIN (FROM THE TOP OF THE TAB)</button><button id="dead-quit">QUIT TO TITLE</button></nav>
+  </section>
+
+  <section id="victory" class="screen dim" hidden>
+    <p class="kicker">CONGRATULATIONS</p>
+    <h2>YOU LOGGED OFF.</h2>
+    <p class="blurb">The Algorithm is uninstalled. The comment section is closed. Somewhere, a notification goes unread, and the world is quieter for it.<br><br>Now go outside. The grass is real. We checked.</p>
+    <dl id="victory-stats" class="stats"></dl>
+    <button id="victory-title" class="big">BACK TO TITLE</button>
+  </section>
+
+  <dialog id="settings" class="panel"><form method="dialog">
+    <h2>SETTINGS</h2>
+    <label>Mouse sensitivity <output id="sens-out">1.0</output><input id="sens" type="range" min="0.2" max="3" step="0.1" value="1"></label>
+    <label>Volume <output id="vol-out">50%</output><input id="vol" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+    <label>Music <output id="music-out">35%</output><input id="music" type="range" min="0" max="1" step="0.05" value="0.35"></label>
+    <label class="check"><input id="always-run" type="checkbox" checked> Always run (Shift walks)</label>
+    <label class="check"><input id="reduced" type="checkbox"> Reduced motion &amp; flashes</label>
+    <label class="check"><input id="low-res" type="checkbox"> Extra-chunky pixels (faster)</label>
+    <label class="check"><input id="scanlines" type="checkbox" checked> CRT scanlines</label>
+    <label class="check"><input id="show-fps" type="checkbox"> Show FPS</label>
+    <button class="big">SAVE (LOCALLY. WE DON'T HAVE SERVERS.)</button>
+  </form></dialog>
+
+  <dialog id="controls" class="panel"><form method="dialog">
+    <h2>CONTROLS</h2>
+    <div class="keys">
+      <span>Move / strafe</span><kbd>W A S D</kbd>
+      <span>Turn</span><kbd>MOUSE / ← →</kbd>
+      <span>Fire</span><kbd>LEFT CLICK / CTRL</kbd>
+      <span>Use doors, switches, walls</span><kbd>E / SPACE</kbd>
+      <span>Walk (with always-run)</span><kbd>SHIFT</kbd>
+      <span>Weapons</span><kbd>1-6 / WHEEL / Q</kbd>
+      <span>Automap</span><kbd>TAB</kbd>
+      <span>Pause / mute</span><kbd>ESC or P / M</kbd>
+    </div>
+    <p class="note">Admin passwords open the matching colored doors. Some walls are not what they seem: press E on anything suspicious. Find the LOG OFF button to leave a tab.</p>
+    <button class="big">GOT IT</button>
+  </form></dialog>
+
+  <dialog id="credits" class="panel"><form method="dialog">
+    <h2>CREDITS</h2>
+    <p>DAMN is an original game by the QSOL crew. Every level, sprite, texture, sound and bad joke is generated by its own code. No assets from any other game.</p>
+    <p>Powered by <b>VANILLAJS</b> (fixed-step clock, frame gate) and <b>OPT</b> (precomputed art, reused buffers, shared flow fields).</p>
+    <p>No Wi-Fi was harmed in the making of this game. Several comment sections were.</p>
+    <button class="big">NICE</button>
+  </form></dialog>
+  <noscript><p class="noscript">DAMN needs JavaScript. Ironic, we know.</p></noscript>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
