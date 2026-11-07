@@ -19,6 +19,8 @@ const server = http.createServer((req, res) => {
   const context = await browser.newContext({viewport:{width:1280, height:720}});
   const page = await context.newPage(), errors = [];
   page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  // Headless shells may refuse or drop pointer lock (which pauses the game); re-enter play mode before input.
+  const play = () => page.evaluate(() => { if (__damn.state !== 'playing') __damn.beginPlaying(); });
   const shot = async name => { await page.screenshot({path:path.join(out, `damn-${name}.png`)}); console.log('screenshot', name); };
   try {
     await page.goto(url);
@@ -33,16 +35,20 @@ const server = http.createServer((req, res) => {
     await page.evaluate(() => { __damn.game.player.angle = 0; });
     await page.waitForTimeout(300); await shot('02-start');
     // Walk to the door, open it with E, walk into the comment hall.
-    await page.keyboard.down('KeyW'); await page.waitForTimeout(450); await page.keyboard.up('KeyW');
-    await page.keyboard.press('KeyE'); await page.waitForTimeout(700);
-    const door = await page.evaluate(() => __damn.game.level.doors.get(__damn.game.level.index(7, 3)).open);
-    assert.ok(door > 0.5, `door should open, open=${door}`);
-    await page.keyboard.down('KeyW'); await page.waitForTimeout(500); await page.keyboard.up('KeyW');
-    await page.keyboard.down('ControlLeft'); await page.waitForTimeout(200); await shot('03-firing'); await page.waitForTimeout(800); await page.keyboard.up('ControlLeft');
+    await play(); await page.keyboard.down('KeyW'); await page.waitForTimeout(300); await page.keyboard.up('KeyW');
+    const walked = await page.evaluate(() => __damn.game.player.x);
+    assert.ok(walked > 3.6, `W walks forward (x=${walked})`);
+    // Stand at the door and press the real E binding.
+    await page.evaluate(() => Object.assign(__damn.game.player, {x:6.4, y:3.5, angle:0, vx:0, vy:0}));
+    await play(); await page.keyboard.press('KeyE');
+    await page.waitForFunction(() => __damn.game.level.doors.get(__damn.game.level.index(7, 3)).open > 0.5, null, {timeout:5000})
+      .catch(async () => { throw new Error(`door did not open: ${JSON.stringify(await page.evaluate(() => ({state:__damn.state, x:__damn.game.player.x, angle:__damn.game.player.angle})))}`); });
+    await play(); await page.keyboard.down('KeyW'); await page.waitForTimeout(500); await page.keyboard.up('KeyW');
+    await play(); await page.keyboard.down('ControlLeft'); await page.waitForTimeout(200); await shot('03-firing'); await page.waitForTimeout(800); await page.keyboard.up('ControlLeft');
     const s1 = await page.evaluate(() => ({x:__damn.game.player.x, shots:__damn.game.player.ammo.clicks, awake:__damn.game.enemies.filter(e => e.state !== 'idle').length}));
     console.log('hall', s1); assert.ok(s1.x > 8, 'walked through the door'); assert.ok(s1.shots < 50, 'fired'); assert.ok(s1.awake > 0, 'gunfire woke the hall');
     await page.waitForTimeout(600); await shot('04-hall');
-    await page.keyboard.press('Tab'); await page.waitForTimeout(200); await shot('05-automap'); await page.keyboard.press('Tab');
+    await play(); await page.keyboard.press('Tab'); await page.waitForTimeout(200); await shot('05-automap'); await page.keyboard.press('Tab');
     // Enemy line-up for the camera: every enemy type in one arena.
     await page.evaluate(() => {
       const g = __damn.game; g.player.airplane = 999;
@@ -54,7 +60,7 @@ const server = http.createServer((req, res) => {
     await page.evaluate(() => { const p = __damn.game.player; for (const w of __damn.WEAPONS) p.weapons.add(w.id); Object.assign(p.ammo, {takes:20, rockets:10, ratio:200}); __damn.game.selectWeapon('ratio'); });
     await page.waitForTimeout(400); await shot('07-ratio-cannon');
     await page.evaluate(() => __damn.game.selectWeapon('hottake')); await page.waitForTimeout(400);
-    await page.keyboard.down('ControlLeft'); await page.waitForTimeout(60); await shot('08-hot-take'); await page.keyboard.up('ControlLeft');
+    await play(); await page.keyboard.down('ControlLeft'); await page.waitForTimeout(60); await shot('08-hot-take'); await page.keyboard.up('ControlLeft');
     // Pause: static frames are skipped by VANILLAJS FrameGate.
     await page.keyboard.press('Escape'); await page.waitForSelector('#pause:not([hidden])');
     const g0 = await page.evaluate(() => __damn.gate.stats()); await page.waitForTimeout(400); const g1 = await page.evaluate(() => __damn.gate.stats());
@@ -62,7 +68,7 @@ const server = http.createServer((req, res) => {
     await page.click('#resume'); await page.evaluate(() => { if (__damn.state !== 'playing') __damn.beginPlaying(); });
     // Exit: stand at the LOG OFF switch and press it.
     await page.evaluate(() => { const g = __damn.game, p = g.player; Object.assign(p, {x:16.5, y:22.5, angle:Math.PI/2, vx:0, vy:0}); g.player.keys.add('r'); });
-    await page.waitForTimeout(150); await shot('10-log-off-switch'); await page.keyboard.press('KeyE');
+    await play(); await page.waitForTimeout(150); await shot('10-log-off-switch'); await page.keyboard.press('KeyE');
     await page.waitForSelector('#intermission:not([hidden])', {timeout:5000}); await shot('11-intermission');
     await page.click('#next-level'); await page.waitForFunction(() => __damn.game.level.def.id === 'L2');
     await page.evaluate(() => { if (__damn.state !== 'playing') __damn.beginPlaying(); });
